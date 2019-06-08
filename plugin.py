@@ -14,6 +14,7 @@
             <li>emeter realtime power (HS110)</li>
             <li>emeter realtime current (HS110)</li>
             <li>emeter realtime voltage (HS110)</li>
+            <li>emeter consumption kWh (HS110)</li>
         </ul>
         <h3>Devices</h3>
         <ul style="list-style-type:square">
@@ -21,6 +22,7 @@
             <li>power - Realtime power in Watts</li>
             <li>current - Realtime current in ampere</li>
             <li>voltage - Voltage input</li>
+            <li>total - Total power consumption (kWh)</li>
         </ul>
     </description>
     <params>
@@ -72,6 +74,7 @@ class TpLinkSmartPlugPlugin:
             Domoticz.Device(Name="emeter current (A)", Unit=2, Type=243, Subtype=23).Create()
             Domoticz.Device(Name="emeter voltage (V)", Unit=3, Type=243, Subtype=8).Create()
             Domoticz.Device(Name="emeter power (W)", Unit=4, Type=243, Subtype=31, Image=1, Used=1).Create()
+            Domoticz.Device(Name="total power consumption (kWh)", Unit=5, TypeName="kWh").Create()
 
         state = self.get_switch_state()
         if state in 'off':
@@ -197,9 +200,10 @@ class TpLinkSmartPlugPlugin:
             err_code = realtime_result.get('err_code', 1)
 
             if err_code == 0:
-                Devices[2].Update(nValue=int(1 * realtime_result['current']), sValue=str(realtime_result['current']))
-                Devices[3].Update(nValue=int(1 * realtime_result['voltage']), sValue=str(realtime_result['voltage']))
-                Devices[4].Update(nValue=int(1 * realtime_result['power']), sValue=str(realtime_result['power']))
+                Devices[2].Update(nValue=int(0.001 * realtime_result['current_ma']), sValue='{0: >#016.1f}'.format((0.001 * realtime_result['current_ma'])))
+                Devices[3].Update(nValue=int(0.001 * realtime_result['voltage_mv']), sValue='{0: >#016.1f}'.format((0.001 * realtime_result['voltage_mv'])))
+                Devices[4].Update(nValue=int(0.001 * realtime_result['power_mw']), sValue='{0: >#016.1f}'.format((0.001 * realtime_result['power_mw'])))
+                Devices[5].Update(nValue=int(0.001 * realtime_result['total_wh']), sValue='{0: >#016.1f}'.format((0.001 * realtime_result['total_wh'])))
 
     def update_switch_state(self):
         if Parameters["Mode1"] == "HS200":
